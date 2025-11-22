@@ -1,0 +1,28 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Terraform local files
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate.*
+*.backup
+.terraform.lock.hcl
+
+# Git and other system files
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
