@@ -1,61 +1,237 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Smart E-Learning</title>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 50px;
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #4c8bf5, #6ee6b4);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 650px;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 18px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 1.2s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
         }
-        form {
-            margin-bottom: 20px;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        input, button {
-            padding: 10px;
-            margin-right: 10px;
-        }
-        a {
-            text-decoration: none;
-            color: blue;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .error {
-            color: red;
-        }
-        .output {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 8px;
-            white-space: pre-wrap;
-        }
+      }
+
+      h2 {
+        text-align: center;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 25px;
+      }
+
+      form {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      input {
+        width: 65%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 2px solid #4c8bf5;
+        outline: none;
+        transition: 0.3s;
+      }
+
+      input:focus {
+        border-color: #6ee6b4;
+        box-shadow: 0 0 8px rgba(76, 139, 245, 0.5);
+      }
+
+      button {
+        background: #4c8bf5;
+        padding: 12px 18px;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-left: 10px;
+        font-size: 15px;
+        transition: 0.3s ease;
+      }
+
+      button:hover {
+        background: #3b6dd8;
+        transform: scale(1.05);
+      }
+
+      a {
+        display: inline-block;
+        padding: 12px 18px;
+        background: #6ee6b4;
+        color: #000;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: 0.3s;
+      }
+      a:hover {
+        background: #55ca9b;
+        transform: scale(1.05);
+      }
+
+      .error {
+        color: red;
+        text-align: center;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .output {
+        background-color: #f8f8f8;
+        border-left: 5px solid #4c8bf5;
+        padding: 20px;
+        margin-top: 25px;
+        border-radius: 12px;
+        white-space: pre-wrap;
+        animation: fadeIn 1.2s ease-in-out;
+      }
+
+      .output h3 {
+        margin-top: 0;
+        color: #333;
+      }
     </style>
-</head>
-<body>
-    <h2>Search Your Course</h2>
-    <form method="POST">
-        <input type="text" name="course" placeholder="Enter course name (e.g., Python Basics)" required>
-        <button type="submit">Get Course Details</button>
-    </form>
+  </head>
 
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
+  <body>
+    <div class="container">
+      <h2>🎓 Smart E-Learning – Course Assistant</h2>
 
-    {% if sas_url %}
+      <form method="POST">
+        <input
+          type="text"
+          name="course"
+          placeholder="Enter course name (e.g., Python Basics)"
+          required
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% endif %} {% if sas_url %}
+      <div style="text-align: center; margin-top: 15px">
         <p><strong>📘 Course Found!</strong></p>
-        <p><a href="{{ sas_url }}" target="_blank">Download Course PDF</a></p>
-    {% endif %}
+        <a href="{{ sas_url }}" target="_blank">📄 Download Course PDF</a>
+      </div>
+      {% endif %} {% if ai_output %}
+      <script>
+        const aiData = {{ ai_output | safe }};
+      </script>
 
-    {% if ai_output %}
-        <div class="output">
-            <h3>🧠 AI-Generated Summary, Quiz & Flashcards</h3>
-            <pre>{{ ai_output }}</pre>
-        </div>
-    {% endif %}
-</body>
+      <div class="output">
+        <h3>🧠 Course Summary</h3>
+        <p id="summary"></p>
+
+        <h3>📝 Quiz Questions</h3>
+        <div id="quiz-container"></div>
+        <button onclick="gradeQuiz()" id="submitQuiz" style="margin-top: 15px">
+          Submit Answers
+        </button>
+
+        <h3 style="margin-top: 25px">📘 Flashcards</h3>
+        <div id="flashcard-container"></div>
+
+        <h3 style="margin-top: 25px">🏆 Result</h3>
+        <p id="result"></p>
+      </div>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          // Insert Summary
+          document.getElementById("summary").innerText = aiData.summary;
+
+          // Render Quiz
+          let quizHTML = "";
+          aiData.quizes.forEach((q, index) => {
+            quizHTML += `
+            <div class="quiz-item" style="margin-bottom:15px;">
+                <p><strong>${index + 1}. ${q.question}</strong></p>
+                <label><input type="radio" name="q${index}" value="${q.op1}"> ${
+              q.op1
+            }</label><br>
+                <label><input type="radio" name="q${index}" value="${q.op2}"> ${
+              q.op2
+            }</label><br>
+                <label><input type="radio" name="q${index}" value="${q.op3}"> ${
+              q.op3
+            }</label><br>
+                <label><input type="radio" name="q${index}" value="${q.op4}"> ${
+              q.op4
+            }</label><br>
+            </div>
+        `;
+          });
+          document.getElementById("quiz-container").innerHTML = quizHTML;
+
+          // Render Flashcards
+          let flashHTML = "";
+          aiData.flashcards.forEach((fc, index) => {
+            flashHTML += `
+            <div style="margin-bottom:15px;">
+                <details>
+                    <summary><strong>${fc.question}</strong></summary>
+                    <p>${fc.flash}</p>
+                </details>
+            </div>
+        `;
+          });
+          document.getElementById("flashcard-container").innerHTML = flashHTML;
+        });
+
+        function gradeQuiz() {
+          let score = 0;
+          let total = aiData.quizes.length;
+
+          aiData.quizes.forEach((q, index) => {
+            let selected = document.querySelector(
+              `input[name="q${index}"]:checked`
+            );
+            if (selected && selected.value === q.answer) {
+              score++;
+              selected.parentElement.style.color = "green";
+            } else if (selected) {
+              selected.parentElement.style.color = "red";
+            }
+          });
+
+          document.getElementById(
+            "result"
+          ).innerHTML = `You scored <strong>${score}/${total}</strong>`;
+        }
+      </script>
+      {% endif %}
+    </div>
+  </body>
 </html>

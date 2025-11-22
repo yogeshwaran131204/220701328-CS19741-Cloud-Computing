@@ -69,6 +69,27 @@ def home():
                 3️⃣ 5 flashcards (Q&A format).
                 Based on this course content:
                 {text[:5000]}
+                Return the output ONLY in this JSON format (no explanation text):
+                Give me the respnse in json format below
+                {{
+                "summary": "value",
+                "quizes": [
+                    {{
+                    "question": "value",
+                    "op1": "value",
+                    "op2": "value",
+                    "op3": "value",
+                    "op4": "value",
+                    "answer": "value"
+                    }}
+                ],
+                "flashcards": [
+                    {{
+                    "question": "value",
+                    "flash": "value"
+                    }}
+                ]
+                }}
                 """
 
                 response = client.chat.completions.create(
